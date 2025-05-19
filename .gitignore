@@ -1,0 +1,6 @@
+__pycache__/
+venv/
+*.mp3
+*.wav
+*.mid
+*.xml

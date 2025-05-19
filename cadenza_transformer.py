@@ -1,35 +1,26 @@
 from music21 import converter, tempo, note, chord, stream, meter
-from pydub import AudioSegment
 import math
+import numpy as np
 
 # TODO clean up functions
 
-# Creates a new .wav file with prepended silence
-def prependSilence(path, duration):
-    name, ext = path.rsplit(".", 1)
-    new_path = f"{name}_with_edit.{ext}"
-    if ext == "wav": audio = AudioSegment.from_wav(path)
-    elif ext == "mp3": audio = AudioSegment.from_mp3(path)
-    silence = AudioSegment.silent(duration=duration) # ms
-    combined = silence + audio
-    combined.export(new_path, format=ext)
-    return new_path
-
-# Creates a new .wav file with a cut at the beginning
-def trimAudio(path, duration):
-    name, ext = path.rsplit(".", 1)
-    new_path = f"{name}_with_edit.{ext}"
-    if ext == "wav": audio = AudioSegment.from_wav(path)
-    elif ext == "mp3": audio = AudioSegment.from_mp3(path)
-    trimmed = audio[duration:]
-    trimmed.export(new_path, format=ext)
-    return new_path
+# Maps audio time in seconds to beat index using interpolation
+def seconds_to_beat(time_sec, beat_times):
+    if time_sec <= beat_times[0]:
+        return 0.0
+    if time_sec >= beat_times[-1]:
+        return len(beat_times)
+    idx = np.searchsorted(beat_times, time_sec) - 1
+    t0 = beat_times[idx]
+    t1 = beat_times[idx + 1]
+    frac = (time_sec - t0) / (t1 - t0)
+    return idx + frac
 
 # Creates a new .mid file, quantized to the resolution
 def quantizeMIDI(path, bpm, resolution):
     score = converter.parse(path)
     score.insert(0, tempo.MetronomeMark(number=bpm))
-    quantized_score = score.quantize((resolution,),True,False,False,True)
+    quantized_score = score.quantize((resolution,),True,True,False,True)
     name, _ = path.rsplit(".", 1)
     quantized_path = f"{name}_quantized.mid"
     quantized_score.write("midi", fp=quantized_path)
