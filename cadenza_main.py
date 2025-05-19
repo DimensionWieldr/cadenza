@@ -3,12 +3,12 @@ import cadenza_transformer
 import basic_pitch_note_tracker
 import pretty_midi
 
-# TODO test a song with a proper pickup (mainly want to see if beats are mapped correctly): despacito LOL
 # TODO beats_per_bar needs to be entered by user? and some values are still hardcoded
+# TODO can we make the alg flow more efficient? better?
 
-path = "monolog_intro.wav"
+path = "despa.wav"
 beats_per_bar = 4
-resolution = 2
+resolution = 4
 
 bpm = cadenza_beat_tracker.getBPM(path)
 seconds_per_beat = 60.0 / bpm
@@ -52,8 +52,6 @@ midi.instruments.append(instrument)
 
 # Write to file
 midi.write("expressive_output.mid")
-
-# TODO can we make the alg flow more efficient? better?
 
 quantized_path = cadenza_transformer.quantizeMIDI("expressive_output.mid", bpm, resolution)
 cadenza_transformer.master(quantized_path, resolution)
